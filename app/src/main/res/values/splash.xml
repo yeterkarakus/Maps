@@ -5,6 +5,7 @@
         <item name="windowSplashScreenAnimationDuration">500</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/logo</item>
         <item name="postSplashScreenTheme">@style/Theme.Maps</item>
+
     </style>
 
 </resources>
