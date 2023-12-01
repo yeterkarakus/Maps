@@ -1,4 +1,6 @@
 <resources>
     <string name="app_name">Maps</string>
-    <string name="arama">Arama</string>
+    <string name="search">Arama</string>
+    <string name="give_permission">İzin Ver</string>
+    <string name="snackbar_text">Uygulamanın kullanılabilmesi için izin gereklidir.</string>
 </resources>
