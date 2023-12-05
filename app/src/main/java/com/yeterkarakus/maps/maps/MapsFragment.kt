@@ -1,4 +1,4 @@
-package com.yeterkarakus.maps
+package com.yeterkarakus.maps.maps
 
 import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.annotation.SuppressLint
@@ -32,6 +32,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.tasks.Task
 import com.google.android.material.snackbar.Snackbar
+import com.yeterkarakus.maps.R
 import com.yeterkarakus.maps.databinding.FragmentMapsBinding
 
 class MapsFragment : Fragment(),OnMapReadyCallback {
@@ -41,6 +42,8 @@ class MapsFragment : Fragment(),OnMapReadyCallback {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var map : GoogleMap
     private lateinit var userLocation : LatLng
+    private lateinit var locationCallback: LocationCallback
+    private lateinit var locationRequest: LocationRequest
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -58,11 +61,22 @@ class MapsFragment : Fragment(),OnMapReadyCallback {
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
         mapFragment?.getMapAsync(this)
 
+        locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 5000).build()
+        locationCallback = object : LocationCallback(){
+            override fun onLocationResult(p0: LocationResult) {
+                val lastLocation = p0.lastLocation
+                lastLocation?.let {
+                    userLocation = LatLng(it.latitude,it.longitude)
+
+                }
+            }
+        }
 
     }
     override fun onMapReady(p0: GoogleMap) {
-        map = p0
 
+
+        map = p0
         when {
             ContextCompat.checkSelfPermission(requireContext(), ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED -> {
 
@@ -70,7 +84,7 @@ class MapsFragment : Fragment(),OnMapReadyCallback {
 
             }
             ActivityCompat.shouldShowRequestPermissionRationale(requireActivity(), ACCESS_FINE_LOCATION) -> {
-                Snackbar.make(binding.root,R.string.snackbar_text,Snackbar.LENGTH_INDEFINITE)
+                Snackbar.make(binding.root, R.string.snackbar_text,Snackbar.LENGTH_INDEFINITE)
                     .setAction(R.string.give_permission){
                         permissionLauncher.launch(ACCESS_FINE_LOCATION)
                     }.show()
@@ -92,25 +106,28 @@ class MapsFragment : Fragment(),OnMapReadyCallback {
             }
         }
     }
+
+
+    @SuppressLint("MissingPermission")
+    override fun onResume() {
+        super.onResume()
+        fusedLocationClient.requestLocationUpdates(locationRequest,locationCallback, Looper.getMainLooper())
+    }
+
     @SuppressLint("MissingPermission")
     private fun getUserLocation(){
-        val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 10000).build()
         val builder = LocationSettingsRequest.Builder().addLocationRequest(locationRequest)
         val client = LocationServices.getSettingsClient(requireActivity())
         val task: Task<LocationSettingsResponse> = client.checkLocationSettings(builder.build())
-
         task.addOnSuccessListener {
-            fusedLocationClient.requestLocationUpdates(locationRequest,
-                object : LocationCallback(){
-                    override fun onLocationResult(p0: LocationResult) {
-                        val lastLocation = p0.lastLocation
-                        lastLocation?.let {
-                            userLocation = LatLng(it.latitude,it.longitude)
-                            map.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 15f))
-                            map.addMarker(MarkerOptions().title("Konum").position(userLocation))
-                        }
-                    }
-                }, Looper.getMainLooper())
+            fusedLocationClient.lastLocation.addOnSuccessListener {
+                userLocation = LatLng(it.latitude,it.longitude)
+                map.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 15f))
+                map.addMarker(MarkerOptions().title("Konum").position(userLocation))
+                println(it.latitude)
+                println(it.longitude)
+
+            }
 
         }.addOnFailureListener { exception ->
             if (exception is ResolvableApiException) {
@@ -123,8 +140,13 @@ class MapsFragment : Fragment(),OnMapReadyCallback {
         }
     }
 
+    override fun onPause() {
+        super.onPause()
+        fusedLocationClient.removeLocationUpdates(locationCallback)
+    }
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        map.clear()
     }
 }
