@@ -12,7 +12,7 @@ data class Datum (
     val review_count: Long,
     val rating: Double,
     val timezone: Timezone,
-    val working_hours: WorkingHours? = null,
+    val working_hours: Map<String, List<String>>? = null,
     val website: String? = null,
     val verified: Boolean,
     val place_link: String,

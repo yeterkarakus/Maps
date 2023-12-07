@@ -2,6 +2,7 @@ package com.yeterkarakus.maps.maps
 
 import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.annotation.SuppressLint
+import android.app.Application
 import android.content.IntentSender
 import android.content.pm.PackageManager
 import androidx.fragment.app.Fragment
@@ -11,10 +12,18 @@ import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.coroutineScope
+import androidx.lifecycle.get
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
@@ -34,7 +43,9 @@ import com.google.android.gms.tasks.Task
 import com.google.android.material.snackbar.Snackbar
 import com.yeterkarakus.maps.R
 import com.yeterkarakus.maps.databinding.FragmentMapsBinding
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MapsFragment : Fragment(),OnMapReadyCallback {
     private var _binding : FragmentMapsBinding? = null
     private val binding get() = _binding!!
@@ -44,7 +55,7 @@ class MapsFragment : Fragment(),OnMapReadyCallback {
     private lateinit var userLocation : LatLng
     private lateinit var locationCallback: LocationCallback
     private lateinit var locationRequest: LocationRequest
-
+    private lateinit var mapsViewModel: MapsViewModel
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -61,20 +72,34 @@ class MapsFragment : Fragment(),OnMapReadyCallback {
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
         mapFragment?.getMapAsync(this)
 
-        locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 5000).build()
+        mapsViewModel = ViewModelProvider(this)[MapsViewModel::class.java]
+        locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 120000).build()
         locationCallback = object : LocationCallback(){
             override fun onLocationResult(p0: LocationResult) {
                 val lastLocation = p0.lastLocation
                 lastLocation?.let {
                     userLocation = LatLng(it.latitude,it.longitude)
-
                 }
             }
         }
 
-    }
-    override fun onMapReady(p0: GoogleMap) {
+        binding.searchText.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                mapsViewModel.getData(binding.searchText.text.toString(),userLocation.latitude,userLocation.longitude,"20","tur","tr")
+                mapsViewModel.searchList.observe(viewLifecycleOwner, Observer {searchNearby->
 
+                    //TODO
+
+                })
+                return@setOnEditorActionListener true
+            }
+
+            return@setOnEditorActionListener false
+        }
+
+    }
+
+    override fun onMapReady(p0: GoogleMap) {
 
         map = p0
         when {
@@ -93,6 +118,9 @@ class MapsFragment : Fragment(),OnMapReadyCallback {
                 permissionLauncher.launch(ACCESS_FINE_LOCATION)
             }
         }
+
+
+
     }
     private fun registerLauncher() {
         permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
@@ -124,9 +152,6 @@ class MapsFragment : Fragment(),OnMapReadyCallback {
                 userLocation = LatLng(it.latitude,it.longitude)
                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 15f))
                 map.addMarker(MarkerOptions().title("Konum").position(userLocation))
-                println(it.latitude)
-                println(it.longitude)
-
             }
 
         }.addOnFailureListener { exception ->

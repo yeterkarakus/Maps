@@ -45,6 +45,7 @@ android {
 dependencies {
 
     val roomVersion = "2.6.1"
+    val lifecycleVersion = "2.6.2"
 
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
@@ -70,8 +71,15 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 
-    implementation ("com.google.dagger:hilt-android:2.45")
-    kapt ("com.google.dagger:hilt-compiler:2.44")
+    implementation ("com.google.dagger:hilt-android:2.49")
+    kapt ("com.google.dagger:hilt-compiler:2.49")
+
+
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
+    implementation ("androidx.lifecycle:lifecycle-viewmodel-savedstate:$lifecycleVersion")
+    kapt ("androidx.lifecycle:lifecycle-compiler:$lifecycleVersion")
 }
 kapt {
     correctErrorTypes=true
