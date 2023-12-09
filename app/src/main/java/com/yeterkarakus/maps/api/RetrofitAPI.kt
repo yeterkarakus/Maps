@@ -9,9 +9,8 @@ import retrofit2.http.Query
 interface RetrofitAPI {
 
     @Headers(
-        "X-RapidAPI-Key: ",
-        "X-RapidAPI-Host: "
-    )
+            "X-RapidAPI-Key: ",
+            "X-RapidAPI-Host: ")
     @GET("/search-nearby")
     suspend fun searchNearby(@Query("query") query :String,
                              @Query("lat") lat:Number,

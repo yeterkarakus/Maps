@@ -80,6 +80,8 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
     implementation ("androidx.lifecycle:lifecycle-viewmodel-savedstate:$lifecycleVersion")
     kapt ("androidx.lifecycle:lifecycle-compiler:$lifecycleVersion")
+
+    implementation ("com.airbnb.android:lottie:6.0.0")
 }
 kapt {
     correctErrorTypes=true

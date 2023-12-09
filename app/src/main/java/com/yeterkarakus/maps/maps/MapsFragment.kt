@@ -2,7 +2,6 @@ package com.yeterkarakus.maps.maps
 
 import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.annotation.SuppressLint
-import android.app.Application
 import android.content.IntentSender
 import android.content.pm.PackageManager
 import androidx.fragment.app.Fragment
@@ -13,17 +12,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.LifecycleObserver
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.coroutineScope
-import androidx.lifecycle.get
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
@@ -37,11 +32,13 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.tasks.Task
 import com.google.android.material.snackbar.Snackbar
 import com.yeterkarakus.maps.R
+import com.yeterkarakus.maps.util.Status
 import com.yeterkarakus.maps.databinding.FragmentMapsBinding
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -85,16 +82,14 @@ class MapsFragment : Fragment(),OnMapReadyCallback {
 
         binding.searchText.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                mapsViewModel.getData(binding.searchText.text.toString(),userLocation.latitude,userLocation.longitude,"20","tur","tr")
-                mapsViewModel.searchList.observe(viewLifecycleOwner, Observer {searchNearby->
 
-                    //TODO
+                observeData()
 
-                })
                 return@setOnEditorActionListener true
             }
 
             return@setOnEditorActionListener false
+
         }
 
     }
@@ -135,6 +130,46 @@ class MapsFragment : Fragment(),OnMapReadyCallback {
         }
     }
 
+    private fun observeData(){
+        mapsViewModel.getData(binding.searchText.text.toString(),userLocation.latitude,userLocation.longitude,"20","tur","tr")
+        mapsViewModel.searchList.observe(viewLifecycleOwner, Observer {
+            when (it.status) {
+                Status.LOADING -> {
+                    binding.loadingAnimation.visibility = View.VISIBLE
+                    binding.map.visibility = View.GONE
+
+
+                }
+
+                Status.SUCCESS -> {
+                    binding.loadingAnimation.visibility = View.GONE
+                    binding.map.visibility = View.VISIBLE
+                    it.data?.let { dataResult ->
+                        for (x in dataResult.data) {
+                            val latLng = LatLng(x.latitude, x.longitude)
+
+                            map.moveCamera(CameraUpdateFactory.newLatLng(latLng))
+                            map.addMarker(
+                                MarkerOptions().icon(
+                                    BitmapDescriptorFactory.defaultMarker(
+                                        BitmapDescriptorFactory.HUE_AZURE
+                                    )
+                                ).title(x.name).position(latLng)
+                            )
+                        }
+                    }
+
+                }
+
+                Status.ERROR -> {
+                    binding.loadingAnimation.visibility = View.GONE
+                    binding.map.visibility = View.VISIBLE
+                    Toast.makeText(requireContext(), it.message, Toast.LENGTH_LONG).show()
+                }
+            }
+        })
+    }
+
 
     @SuppressLint("MissingPermission")
     override fun onResume() {
@@ -150,7 +185,7 @@ class MapsFragment : Fragment(),OnMapReadyCallback {
         task.addOnSuccessListener {
             fusedLocationClient.lastLocation.addOnSuccessListener {
                 userLocation = LatLng(it.latitude,it.longitude)
-                map.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 15f))
+                map.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 13f))
                 map.addMarker(MarkerOptions().title("Konum").position(userLocation))
             }
 
