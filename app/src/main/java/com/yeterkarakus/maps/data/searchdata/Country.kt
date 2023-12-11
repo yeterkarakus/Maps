@@ -1,4 +1,4 @@
-package com.yeterkarakus.maps.data
+package com.yeterkarakus.maps.data.searchdata
 
 enum class Country(val value: String) {
     Tr("TR");

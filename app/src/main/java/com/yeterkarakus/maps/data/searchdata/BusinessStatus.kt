@@ -1,4 +1,4 @@
-package com.yeterkarakus.maps.data
+package com.yeterkarakus.maps.data.searchdata
 
 enum class BusinessStatus(val value: String) {
     Open("OPEN");

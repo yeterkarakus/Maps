@@ -17,8 +17,8 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
@@ -38,6 +38,7 @@ import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.tasks.Task
 import com.google.android.material.snackbar.Snackbar
 import com.yeterkarakus.maps.R
+import com.yeterkarakus.maps.data.Data
 import com.yeterkarakus.maps.util.Status
 import com.yeterkarakus.maps.databinding.FragmentMapsBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -53,6 +54,7 @@ class MapsFragment : Fragment(),OnMapReadyCallback {
     private lateinit var locationCallback: LocationCallback
     private lateinit var locationRequest: LocationRequest
     private lateinit var mapsViewModel: MapsViewModel
+    private var data = Data()
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -70,12 +72,13 @@ class MapsFragment : Fragment(),OnMapReadyCallback {
         mapFragment?.getMapAsync(this)
 
         mapsViewModel = ViewModelProvider(this)[MapsViewModel::class.java]
-        locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 120000).build()
+        locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 10000).build()
         locationCallback = object : LocationCallback(){
             override fun onLocationResult(p0: LocationResult) {
                 val lastLocation = p0.lastLocation
                 lastLocation?.let {
                     userLocation = LatLng(it.latitude,it.longitude)
+                    println(lastLocation)
                 }
             }
         }
@@ -132,11 +135,13 @@ class MapsFragment : Fragment(),OnMapReadyCallback {
 
     private fun observeData(){
         mapsViewModel.getData(binding.searchText.text.toString(),userLocation.latitude,userLocation.longitude,"20","tur","tr")
-        mapsViewModel.searchList.observe(viewLifecycleOwner, Observer {
+        mapsViewModel.searchList.observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.LOADING -> {
                     binding.loadingAnimation.visibility = View.VISIBLE
                     binding.map.visibility = View.GONE
+                    map.clear()
+
 
 
                 }
@@ -144,6 +149,7 @@ class MapsFragment : Fragment(),OnMapReadyCallback {
                 Status.SUCCESS -> {
                     binding.loadingAnimation.visibility = View.GONE
                     binding.map.visibility = View.VISIBLE
+                    map.setInfoWindowAdapter(CustomInfoWindow(requireContext()))
                     it.data?.let { dataResult ->
                         for (x in dataResult.data) {
                             val latLng = LatLng(x.latitude, x.longitude)
@@ -154,20 +160,34 @@ class MapsFragment : Fragment(),OnMapReadyCallback {
                                     BitmapDescriptorFactory.defaultMarker(
                                         BitmapDescriptorFactory.HUE_AZURE
                                     )
-                                ).title(x.name).position(latLng)
+                                ).title(x.name).snippet(x.rating.toString()).position(latLng)
                             )
+                            val mData = Data(
+                                x.name,
+                                x.business_id,
+                                x.phone_number,
+                                x.full_address,
+                                x.website,
+                                x.photos_sample[0].photo_url
+
+                            )
+                            map.setInfoWindowAdapter(CustomInfoWindow(requireContext()))
+                            data = mData
+
                         }
+                        map.setOnInfoWindowClickListener {
+                            findNavController().navigate(MapsFragmentDirections.actionMapsFragmentToDetailsFragment(data))
+                        }
+
                     }
-
                 }
-
                 Status.ERROR -> {
                     binding.loadingAnimation.visibility = View.GONE
                     binding.map.visibility = View.VISIBLE
                     Toast.makeText(requireContext(), it.message, Toast.LENGTH_LONG).show()
                 }
             }
-        })
+        }
     }
 
 
@@ -186,7 +206,7 @@ class MapsFragment : Fragment(),OnMapReadyCallback {
             fusedLocationClient.lastLocation.addOnSuccessListener {
                 userLocation = LatLng(it.latitude,it.longitude)
                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 13f))
-                map.addMarker(MarkerOptions().title("Konum").position(userLocation))
+                map.addMarker(MarkerOptions().title("Konumunuz").position(userLocation))
             }
 
         }.addOnFailureListener { exception ->
@@ -207,6 +227,6 @@ class MapsFragment : Fragment(),OnMapReadyCallback {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-        map.clear()
     }
+
 }

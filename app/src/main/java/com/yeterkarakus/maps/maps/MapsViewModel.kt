@@ -6,7 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.yeterkarakus.maps.repository.MapsRepository
-import com.yeterkarakus.maps.data.SearchNearby
+import com.yeterkarakus.maps.data.searchdata.SearchNearby
 import com.yeterkarakus.maps.util.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch

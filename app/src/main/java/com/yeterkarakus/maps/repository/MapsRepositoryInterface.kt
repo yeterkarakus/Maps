@@ -1,6 +1,6 @@
 package com.yeterkarakus.maps.repository
 
-import com.yeterkarakus.maps.data.SearchNearby
+import com.yeterkarakus.maps.data.searchdata.SearchNearby
 import com.yeterkarakus.maps.util.Result
 
 interface MapsRepositoryInterface {

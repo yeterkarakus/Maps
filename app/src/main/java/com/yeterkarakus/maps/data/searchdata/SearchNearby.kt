@@ -1,6 +1,7 @@
-package com.yeterkarakus.maps.data
+package com.yeterkarakus.maps.data.searchdata
 
-import com.yeterkarakus.maps.data.Datum
+
+
 
 data class SearchNearby(
     val status: String,

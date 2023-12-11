@@ -1,4 +1,4 @@
-package com.yeterkarakus.maps.data
+package com.yeterkarakus.maps.data.searchdata
 
 data class About(
     val summary: String,

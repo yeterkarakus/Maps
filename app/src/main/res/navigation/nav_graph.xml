@@ -9,5 +9,21 @@
         android:id="@+id/mapsFragment"
         android:name="com.yeterkarakus.maps.maps.MapsFragment"
         android:label="fragment_maps"
-        tools:layout="@layout/fragment_maps" />
+        tools:layout="@layout/fragment_maps" >
+        <action
+            android:id="@+id/action_mapsFragment_to_detailsFragment"
+            app:destination="@id/detailsFragment">
+        </action>
+
+    </fragment>
+    <fragment
+        android:id="@+id/detailsFragment"
+        android:name="com.yeterkarakus.maps.details.DetailsFragment"
+        android:label="fragment_details"
+        tools:layout="@layout/fragment_details">
+    <argument
+        android:name="mArg"
+        app:argType="com.yeterkarakus.maps.data.Data" />
+    </fragment>
+
 </navigation>

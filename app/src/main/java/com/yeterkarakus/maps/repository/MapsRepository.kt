@@ -1,7 +1,7 @@
 package com.yeterkarakus.maps.repository
 
 import com.yeterkarakus.maps.api.RetrofitAPI
-import com.yeterkarakus.maps.data.SearchNearby
+import com.yeterkarakus.maps.data.searchdata.SearchNearby
 import com.yeterkarakus.maps.util.Result
 import java.lang.Exception
 import javax.inject.Inject

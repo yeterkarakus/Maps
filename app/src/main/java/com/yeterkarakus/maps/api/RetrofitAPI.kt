@@ -1,6 +1,6 @@
 package com.yeterkarakus.maps.api
 
-import com.yeterkarakus.maps.data.SearchNearby
+import com.yeterkarakus.maps.data.searchdata.SearchNearby
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Headers
@@ -9,8 +9,9 @@ import retrofit2.http.Query
 interface RetrofitAPI {
 
     @Headers(
-            "X-RapidAPI-Key: ",
-            "X-RapidAPI-Host: ")
+        "X-RapidAPI-Key: ",
+        "X-RapidAPI-Host: ")
+
     @GET("/search-nearby")
     suspend fun searchNearby(@Query("query") query :String,
                              @Query("lat") lat:Number,

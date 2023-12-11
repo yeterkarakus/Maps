@@ -1,4 +1,5 @@
-package com.yeterkarakus.maps.data
+package com.yeterkarakus.maps.data.searchdata
+
 
 data class Datum (
     val business_id: String,
