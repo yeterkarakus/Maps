@@ -6,7 +6,6 @@
     </style>
 
     <style name="Theme.Maps" parent="Base.Theme.Maps">
-    <item name="android:statusBarColor">@color/material_on_primary_emphasis_medium</item>
 
 
     </style>

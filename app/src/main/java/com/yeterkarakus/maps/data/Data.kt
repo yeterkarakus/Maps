@@ -4,12 +4,12 @@ import android.os.Parcel
 import android.os.Parcelable
 
 data class Data(
-    val name: String? = null,
-    val businessId: String? = null,
-    val phoneNumber: String? = null,
-    val fullAddress: String? = null,
-    val website: String? = null,
-    val photoUrl: String? = null,
+    var name: String? = null,
+    var businessId: String? = null,
+    var phoneNumber: String? = null,
+    var fullAddress: String? = null,
+    var website: String? = null,
+    var photoUrl: String? = null,
 ):Parcelable {
     constructor(parcel: Parcel) : this(
         parcel.readString(),

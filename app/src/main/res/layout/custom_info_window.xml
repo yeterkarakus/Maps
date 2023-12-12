@@ -8,7 +8,7 @@
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
-        android:layout_height="120dp"
+        android:layout_height="wrap_content"
         app:cardCornerRadius="15dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -23,11 +23,10 @@
             <TextView
                 android:id="@+id/title"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
+                android:layout_height="wrap_content"
                 android:padding="5dp"
                 android:text="Title"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-
                 app:layout_constraintBottom_toTopOf="@+id/rating"
                 app:layout_constraintEnd_toEndOf="@id/cardViewLayout"
                 app:layout_constraintStart_toStartOf="@id/cardViewLayout"

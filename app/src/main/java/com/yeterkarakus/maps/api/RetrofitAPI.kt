@@ -1,5 +1,6 @@
 package com.yeterkarakus.maps.api
 
+import com.yeterkarakus.maps.data.rewievsdata.Reviews
 import com.yeterkarakus.maps.data.searchdata.SearchNearby
 import retrofit2.Response
 import retrofit2.http.GET
@@ -19,4 +20,13 @@ interface RetrofitAPI {
                              @Query("limit") limit:String,
                              @Query("language") language:String,
                              @Query("region") region:String ) : Response<SearchNearby>
+
+    @Headers(
+        "X-RapidAPI-Key: ",
+        "X-RapidAPI-Host: ")
+    @GET("/business-reviews")
+    suspend fun reviews(@Query("business_id") business_id :String,
+                        @Query("limit") limit:Number,
+                        @Query("language") language:String,
+                        @Query("region") region:String) : Response<Reviews>
 }

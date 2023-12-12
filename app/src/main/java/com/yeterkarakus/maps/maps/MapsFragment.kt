@@ -72,7 +72,7 @@ class MapsFragment : Fragment(),OnMapReadyCallback {
         mapFragment?.getMapAsync(this)
 
         mapsViewModel = ViewModelProvider(this)[MapsViewModel::class.java]
-        locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 10000).build()
+        locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 600000).build()
         locationCallback = object : LocationCallback(){
             override fun onLocationResult(p0: LocationResult) {
                 val lastLocation = p0.lastLocation
@@ -171,9 +171,9 @@ class MapsFragment : Fragment(),OnMapReadyCallback {
                                 x.photos_sample[0].photo_url
 
                             )
+
                             map.setInfoWindowAdapter(CustomInfoWindow(requireContext()))
                             data = mData
-
                         }
                         map.setOnInfoWindowClickListener {
                             findNavController().navigate(MapsFragmentDirections.actionMapsFragmentToDetailsFragment(data))
