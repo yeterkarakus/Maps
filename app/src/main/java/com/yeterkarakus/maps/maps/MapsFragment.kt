@@ -42,7 +42,6 @@ import com.yeterkarakus.maps.data.Data
 import com.yeterkarakus.maps.util.Status
 import com.yeterkarakus.maps.databinding.FragmentMapsBinding
 import dagger.hilt.android.AndroidEntryPoint
-
 @AndroidEntryPoint
 class MapsFragment : Fragment(),OnMapReadyCallback {
     private var _binding : FragmentMapsBinding? = null
@@ -54,7 +53,6 @@ class MapsFragment : Fragment(),OnMapReadyCallback {
     private lateinit var locationCallback: LocationCallback
     private lateinit var locationRequest: LocationRequest
     private lateinit var mapsViewModel: MapsViewModel
-    private var data = Data()
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -72,13 +70,12 @@ class MapsFragment : Fragment(),OnMapReadyCallback {
         mapFragment?.getMapAsync(this)
 
         mapsViewModel = ViewModelProvider(this)[MapsViewModel::class.java]
-        locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 600000).build()
+        locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 1000).build()
         locationCallback = object : LocationCallback(){
             override fun onLocationResult(p0: LocationResult) {
                 val lastLocation = p0.lastLocation
                 lastLocation?.let {
                     userLocation = LatLng(it.latitude,it.longitude)
-                    println(lastLocation)
                 }
             }
         }
@@ -90,9 +87,7 @@ class MapsFragment : Fragment(),OnMapReadyCallback {
 
                 return@setOnEditorActionListener true
             }
-
             return@setOnEditorActionListener false
-
         }
 
     }
@@ -118,7 +113,6 @@ class MapsFragment : Fragment(),OnMapReadyCallback {
         }
 
 
-
     }
     private fun registerLauncher() {
         permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
@@ -135,50 +129,53 @@ class MapsFragment : Fragment(),OnMapReadyCallback {
 
     private fun observeData(){
         mapsViewModel.getData(binding.searchText.text.toString(),userLocation.latitude,userLocation.longitude,"20","tur","tr")
-        mapsViewModel.searchList.observe(viewLifecycleOwner) {
+        mapsViewModel.searchList.observe(viewLifecycleOwner) { it ->
             when (it.status) {
                 Status.LOADING -> {
                     binding.loadingAnimation.visibility = View.VISIBLE
                     binding.map.visibility = View.GONE
                     map.clear()
 
-
-
                 }
 
                 Status.SUCCESS -> {
                     binding.loadingAnimation.visibility = View.GONE
                     binding.map.visibility = View.VISIBLE
-                    map.setInfoWindowAdapter(CustomInfoWindow(requireContext()))
+
+                    val data = arrayListOf<Data>()
+
                     it.data?.let { dataResult ->
                         for (x in dataResult.data) {
                             val latLng = LatLng(x.latitude, x.longitude)
 
-                            map.moveCamera(CameraUpdateFactory.newLatLng(latLng))
-                            map.addMarker(
-                                MarkerOptions().icon(
-                                    BitmapDescriptorFactory.defaultMarker(
-                                        BitmapDescriptorFactory.HUE_AZURE
-                                    )
-                                ).title(x.name).snippet(x.rating.toString()).position(latLng)
+                            map.addMarker(MarkerOptions()
+                                .icon(BitmapDescriptorFactory.defaultMarker(
+                                        BitmapDescriptorFactory.HUE_AZURE))
+                                .title(x.name).snippet(x.rating.toString())
+                                .position(latLng)
                             )
-                            val mData = Data(
+                            val mData =Data(
                                 x.name,
                                 x.business_id,
                                 x.phone_number,
                                 x.full_address,
                                 x.website,
                                 x.photos_sample[0].photo_url
-
                             )
-
-                            map.setInfoWindowAdapter(CustomInfoWindow(requireContext()))
-                            data = mData
-                        }
-                        map.setOnInfoWindowClickListener {
-                            findNavController().navigate(MapsFragmentDirections.actionMapsFragmentToDetailsFragment(data))
+                        data.add(mData)
                         }
 
+                        println(data)
+                        map.setInfoWindowAdapter(CustomInfoWindow(requireContext()))
+                        map.setOnInfoWindowClickListener {marker->
+
+                            val clickedData = data.find {
+                                it.name == marker.title
+                            }
+                            clickedData?.let {
+                            findNavController().navigate(MapsFragmentDirections.actionMapsFragmentToDetailsFragment(it))
+                            }
+                        }
                     }
                 }
                 Status.ERROR -> {
