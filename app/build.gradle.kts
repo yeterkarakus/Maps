@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -8,6 +10,7 @@ plugins {
 }
 
 android {
+
     namespace = "com.yeterkarakus.maps"
     compileSdk = 34
 
@@ -19,6 +22,13 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+
+        val properties = Properties()
+        properties.load(project.rootProject.file("local.properties").inputStream())
+        buildConfigField("String", "RapidAPI_Key", properties.getProperty("RapidAPI_Key"))
+        buildConfigField("String", "RapidAPI_Host", properties.getProperty("RapidAPI_Host"))
+
     }
 
     buildTypes {
@@ -28,10 +38,13 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+
         }
+
     }
     buildFeatures {
         viewBinding = true
+        buildConfig = true
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -65,6 +78,7 @@ dependencies {
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1")
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
     implementation ("com.google.dagger:hilt-android:2.49")
     kapt ("com.google.dagger:hilt-compiler:2.49")
